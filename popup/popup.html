@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>SafeBrowse Guardian</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <h1>🛡️ SafeBrowse Guardian</h1>
+
+    <!-- Link bị cảnh báo -->
+    <section>
+      <h2>🚨 Link bị cảnh báo</h2>
+      <ul id="warningList"></ul>
+      <button id="clearLogs">🗑️ Xoá danh sách</button>
+    </section>
+
+    <hr />
+
+    <!-- Quản lý domain -->
+    <section>
+      <h2>⚙️ Quản lý Domain</h2>
+      <div style="margin-top: 10px">
+        <label>
+          <input type="checkbox" id="toggleSandbox" />
+          Bật sandboxed URL behavior analysis 🔍
+        </label>
+      </div>
+      <div>
+        <input
+          id="blackInput"
+          type="text"
+          placeholder="Thêm domain vào blacklist..."
+        />
+        <button id="addBlack">✚</button>
+        <ul id="blacklist"></ul>
+      </div>
+
+      <div>
+        <button id="refresh">⟳ Làm mới</button>
+        <button id="export">⇡ Xuất JSON</button>
+        <input type="file" id="importJson" accept=".json" />
+      </div>
+    </section>
+
+    <textarea id="dbOutput" readonly></textarea>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

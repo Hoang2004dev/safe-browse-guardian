@@ -1,0 +1,100 @@
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Test SafeBrowse Guardian Extension</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    h1, h2 {
+      color: #333;
+    }
+    a {
+      color: #0066cc;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .description {
+      color: #555;
+      font-style: italic;
+    }
+    iframe, script {
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>🛡️ Test SafeBrowse Guardian Extension</h1>
+  <p>Trang này giúp kiểm tra các tính năng của SafeBrowse Guardian: click link, redirect, iframe, script độc hại, và domain blacklist.</p>
+
+  <!-- Test 1: Safe Link -->
+  <div class="test-section">
+    <h2>1. Kiểm Tra Link An Toàn</h2>
+    <p class="description">Link này trỏ đến một trang an toàn, không bị chặn, không redirect.</p>
+    <a href="https://www.google.com">Link an toàn: Google</a>
+  </div>
+
+  <!-- Test 2: Redirect Link -->
+  <div class="test-section">
+    <h2>2. Kiểm Tra Link Redirect</h2>
+    <p class="description">Link này chứa tham số redirect đến một domain khác. Extension sẽ phát hiện và cảnh báo.</p>
+    <a href="https://bit.ly/3example">Link redirect: bit.ly (chuyển đến example.com)</a>
+  </div>
+
+  <!-- Test 3: Suspicious Link -->
+  <div class="test-section">
+    <h2>3. Kiểm Tra Link Đáng Nghi</h2>
+    <p class="description">Link này có pattern đáng nghi (login-paypal.xyz) và có thể bị Safe Browsing hoặc heuristic chặn.</p>
+    <a href="https://login-paypal.xyz/verify-account">Link đáng nghi: login-paypal.xyz</a>
+  </div>
+
+  <!-- Test 4: Blacklisted Domain -->
+  <div class="test-section">
+    <h2>4. Kiểm Tra Domain Blacklist</h2>
+    <p class="description">Thêm 'malicious-site.top' vào blacklist trong popup, sau đó click link này để kiểm tra chặn.</p>
+    <a href="https://malicious-site.top">Link blacklist: malicious-site.top</a>
+  </div>
+
+  <!-- Test 5: Malicious Iframe -->
+  <div class="test-section">
+    <h2>5. Kiểm Tra Iframe Độc Hại</h2>
+    <p class="description">Iframe này trỏ đến domain đáng nghi. Extension nên phát hiện và xóa nó.</p>
+    <iframe src="https://fake-login.ru/attack" width="300" height="150"></iframe>
+  </div>
+
+  <!-- Test 6: External Malicious Script -->
+  <div class="test-section">
+    <h2>6. Kiểm Tra Script Độc Hại</h2>
+    <p class="description">Script này tải từ domain đáng nghi. Sandbox analysis nên phát hiện hành vi bất thường.</p>
+    <script src="https://suspicious-script.win/malware.js"></script>
+  </div>
+
+  <!-- Test 7: Sandbox Behavior -->
+  <div class="test-section">
+    <h2>7. Kiểm Tra Phân Tích Hành Vi Sandbox</h2>
+    <p class="description">Link này cố gắng redirect và nhúng script/iframe độc hại. Sandbox sẽ phát hiện redirect, script, hoặc iframe nguy hiểm.</p>
+    <a href="https://shady-site.click/redirect?to=https://malware-host.ru/attack">Link sandbox test: shady-site.click</a>
+  </div>
+
+  <p><strong>Hướng dẫn:</strong></p>
+  <ul>
+    <li>Thêm 'malicious-site.top' vào blacklist qua popup của extension.</li>
+    <li>Click từng link để kiểm tra popup cảnh báo, redirect, và chặn domain.</li>
+    <li>Xem console (F12) và popup extension để kiểm tra log và warning.</li>
+    <li>Đảm bảo bật 'Phân tích hành vi URL trong Sandbox' trong popup để test tính năng sandbox.</li>
+  </ul>
+</body>
+</html>
+```
