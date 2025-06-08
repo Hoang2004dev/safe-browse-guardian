@@ -1,0 +1,27 @@
+# MacOS system files
+.DS_Store
+
+# Node modules (nếu dùng tool như webpack, vite, etc.)
+node_modules/
+
+# Vscode settings (optional)
+.vscode/
+
+# Build output (nếu bạn dùng script để build)
+dist/
+build/
+out/
+
+# Log files
+*.log
+
+# API key / cấu hình riêng tư (nếu tách ra file riêng)
+config.js
+.env
+
+# Chrome extension local DB (chỉ nếu bạn export/thử nghiệm backup)
+localStorage.json
+chrome-extension/
+
+# Zip files (nếu bạn tạo file nén để upload)
+*.zip
