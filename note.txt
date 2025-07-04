@@ -1,1 +1,49 @@
 npm install --save-dev @types/chrome
+
+
+
+
+SafeBrowseGuardian/
+│
+├── manifest.json
+├── background/
+│   ├── index.ts
+│   ├── constants.ts
+│   ├── db.ts
+│   ├── urlUtils.ts
+│   ├── rules.ts
+│   ├── messageHandler.ts               ← Chuyển thành router đơn giản
+│   └── handlers/                       ← Mới: tách từng message-type
+│       └── checkUrlHandler.ts         ← Gọi aggregator và xử lý warningLogs
+│
+├── content/
+│   ├── index.ts
+│   ├── dom.ts
+│   ├── popup.ts
+│   ├── observer.ts
+│   ├── sandbox.ts
+│   └── sandboxAnalyzer.ts             ← Di chuyển logic phân tích sandbox riêng
+│
+├── popup/                             
+│   ├── index.ts
+│   ├── normalize.ts
+│   ├── rules.ts
+│   ├── storage.ts
+│   ├── ui.ts
+│   ├── popup.html
+│   └── style.css
+│
+├── shared/
+│   ├── utils/
+│   │   └── urlUtils.ts
+│   ├── types/
+│   │   └── threatTypes.ts
+│   └── threatSources/
+│       ├── aggregator.ts
+│       ├── googleSafeBrowsing.ts
+│       ├── phishTank.ts
+│       ├── urlScan.ts
+│       ├── abuseIPDB.ts
+│       └── suspiciousHeuristics.ts   
+│
+└── assets/ (icons, fonts...)

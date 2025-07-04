@@ -1,23 +1,20 @@
-//=================================== popup.ts
+import { getOverlayStyle, getPopupStyle, getLevelStyle, getButtonStyle, getDetailsStyle } from "./popupStyle";
+
 export function showWarningPopup(
   msg: string,
   url: string,
   onContinue: () => void,
-  onBlock: () => void
+  onBlock: () => void,
+  level: "critical" | "warning" | "info" = "info"
 ): void {
   if (document.querySelector(".safebrowse-overlay")) return;
 
   const overlay = document.createElement("div");
   overlay.className = "safebrowse-overlay";
-  overlay.style.cssText = `position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.5); z-index: 9999; display: flex;
-    justify-content: center; align-items: center;`;
+  overlay.style.cssText = getOverlayStyle();
 
   const popup = document.createElement("div");
-  popup.style.cssText = `
-    background: white; padding: 20px; border-radius: 8px;
-    max-width: 400px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-  `;
+  popup.style.cssText = getPopupStyle();
 
   const createEl = (tag: string, text: string, css: string) => {
     const el = document.createElement(tag);
@@ -26,10 +23,23 @@ export function showWarningPopup(
     return el;
   };
 
-  popup.appendChild(createEl("p", msg.split("<br>")[0], "margin: 0 0 15px; color: #d32f2f;"));
-  const detail = msg.split("<br>")[1]?.replace(/<\/?small>/g, "");
-  if (detail) popup.appendChild(createEl("p", detail, "margin: 0 0 15px; color: #666; font-size: 0.9em;"));
-  popup.appendChild(createEl("p", url, "margin: 0 0 15px; word-break: break-all;"));
+  const firstLine = msg.split("<br>")[0];
+  popup.appendChild(createEl("p", firstLine, getLevelStyle(level)));
+
+  const detail = msg.split("<br>").slice(1).join("<br>");
+  if (detail) {
+    const detailEl = document.createElement("details");
+    detailEl.style.cssText = getDetailsStyle();
+    const summary = document.createElement("summary");
+    summary.textContent = "Chi tiết cảnh báo";
+    const inner = document.createElement("div");
+    inner.innerHTML = detail;
+    detailEl.appendChild(summary);
+    detailEl.appendChild(inner);
+    popup.appendChild(detailEl);
+  }
+
+  popup.appendChild(createEl("p", url, "margin: 0 0 15px; word-break: break-word; font-size: 0.85em;"));
 
   const actions = [
     { id: "continueBtn", text: "Tiếp tục", color: "#4CAF50", cb: onContinue },
@@ -41,8 +51,7 @@ export function showWarningPopup(
     const btn = document.createElement("button");
     btn.id = id;
     btn.textContent = text;
-    btn.style.cssText = `padding: 8px 16px; margin: 5px; background: ${color}; color: white;
-      border: none; border-radius: 4px; cursor: pointer;`;
+    btn.style.cssText = getButtonStyle(color);
     btn.onclick = () => {
       overlay.remove();
       cb();

@@ -1,38 +1,40 @@
 //=================================== messageHandle.ts
-import { isUrlSafe } from "./safeBrowsing";
-import { resolveFinalUrl } from "./urlUtils";
+import { handleCheckUrl } from "./handlers/checkUrlHandler";
 import { LocalDB } from "./db";
 
 export function registerMessageHandlers() {
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.type === "CHECK_URL") {
-      resolveFinalUrl(message.url).then((finalUrl) => {
-        LocalDB.get().then((db) => {
-          isUrlSafe(finalUrl).then((safe) => {
-            if (!safe) LocalDB.addToList("warningLogs", finalUrl);
-            sendResponse({ safe, finalUrl });
-          });
-        });
-      });
-      return true;
-    }
+    (async () => {
+      switch (message.type) {
+        case "CHECK_URL":
+          const result = await handleCheckUrl(message.url);
+          sendResponse(result);
+          break;
 
-    if (message.type === "LOG") {
-      console.log(message.message);
-    }
+        case "ADD_TO_BLACKLIST":
+          await LocalDB.addToList("blacklist", message.url);
+          sendResponse({ success: true });
+          break;
 
-    if (message.type === "ADD_TO_BLACKLIST") {
-      LocalDB.addToList("blacklist", message.url).then(() => {
-        sendResponse({ success: true });
-      });
-      return true;
-    }
+        case "GET_BLACKLIST":
+          const db = await LocalDB.get();
+          sendResponse({ blacklist: db.blacklist });
+          break;
 
-    if (message.type === "GET_BLACKLIST") {
-      LocalDB.get().then((db) => {
-        sendResponse({ blacklist: db.blacklist });
-      });
-      return true;
-    }
+        case "TOGGLE_EXTENSION":
+          await LocalDB.setExtensionEnabled(message.enabled);
+          sendResponse({ success: true });
+          break;
+
+        case "LOG":
+          console.log(message.message);
+          break;
+
+        default:
+          console.warn("Unrecognized message type:", message.type);
+      }
+    })();
+
+    return true; 
   });
 }

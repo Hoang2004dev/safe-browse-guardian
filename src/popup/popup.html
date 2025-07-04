@@ -1,54 +1,14 @@
-<!-- //=================================== popup.html -->
+<!-- popup/popup.html -->
 <!DOCTYPE html>
 <html lang="vi">
   <head>
     <meta charset="UTF-8" />
     <title>SafeBrowse Guardian</title>
     <link rel="stylesheet" href="style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   </head>
   <body>
     <h1>🛡️ SafeBrowse Guardian</h1>
-
-    <!-- Danh sách cảnh báo -->
-    <section>
-      <h2>🚨 Link bị cảnh báo</h2>
-      <ul id="warningList"></ul>
-      <button id="clearLogs">🗑️ Xoá danh sách</button>
-    </section>
-
-    <hr />
-
-    <!-- Quản lý domain blacklist -->
-    <section>
-      <h2>⚙️ Quản lý Domain</h2>
-
-      <div style="margin-top: 10px">
-        <label>
-          <input type="checkbox" id="toggleSandbox" />
-          Bật phân tích sandbox 🔍
-        </label>
-      </div>
-
-      <div>
-        <input
-          id="blackInput"
-          type="text"
-          placeholder="Thêm domain vào blacklist..."
-        />
-        <button id="addBlack">✚</button>
-        <ul id="blacklist"></ul>
-      </div>
-
-      <div>
-        <button id="refresh">⟳ Làm mới</button>
-        <button id="export">⇡ Xuất JSON</button>
-        <input type="file" id="importJson" accept=".json" />
-      </div>
-    </section>
-
-    <!-- Hiển thị dữ liệu dạng JSON -->
-    <textarea id="dbOutput" readonly></textarea>
-
-    <script src="popup.js"></script>
+    <script type="module" src="popup.js"></script>
   </body>
 </html>

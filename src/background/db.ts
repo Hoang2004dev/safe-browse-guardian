@@ -11,6 +11,9 @@ export const LocalDB = {
           blacklist: [],
           warningLogs: [],
           sandboxEnabled: true,
+          blockedCount: 0,
+          threatCount: 0,
+          extensionEnabled: true,
         },
       });
     }
@@ -18,7 +21,18 @@ export const LocalDB = {
 
   async get() {
     const data = await chrome.storage.local.get(LOCAL_DB_KEY);
-    return data[LOCAL_DB_KEY] || { blacklist: [], warningLogs: [], sandboxEnabled: true };
+    const db = data[LOCAL_DB_KEY] || {};
+
+    return (
+      data[LOCAL_DB_KEY] || {
+        blacklist: [],
+        warningLogs: [],
+        sandboxEnabled: true,
+        blockedCount: 0,
+        threatCount: 0,
+        extensionEnabled: db.extensionEnabled !== false,
+      }
+    );
   },
 
   async addToList(listName: string, value: string) {
@@ -33,10 +47,18 @@ export const LocalDB = {
     }
   },
 
+  async incrementThreatCount() {
+    const db = await this.get();
+    db.threatCount = (db.threatCount || 0) + 1;
+    await chrome.storage.local.set({ [LOCAL_DB_KEY]: db });
+  },
+
   async removeFromList(listName: string, value: string) {
     const db = await this.get();
     const domain = normalizeDomain(value);
-    db[listName] = db[listName].filter((item: string) => normalizeDomain(item) !== domain);
+    db[listName] = db[listName].filter(
+      (item: string) => normalizeDomain(item) !== domain
+    );
     await chrome.storage.local.set({ [LOCAL_DB_KEY]: db });
   },
 
@@ -50,5 +72,11 @@ export const LocalDB = {
     const db = await this.get();
     db.sandboxEnabled = enabled;
     await chrome.storage.local.set({ [LOCAL_DB_KEY]: db });
-  }
+  },
+
+  async setExtensionEnabled(enabled: boolean) {
+    const db = await this.get();
+    db.extensionEnabled = enabled;
+    await chrome.storage.local.set({ [LOCAL_DB_KEY]: db });
+  },
 };

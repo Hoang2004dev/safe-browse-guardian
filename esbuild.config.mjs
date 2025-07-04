@@ -31,7 +31,7 @@ async function buildAll() {
       ...shared,
     }),
     build({
-      entryPoints: ['./src/popup/index.ts'],
+      entryPoints: ['./src/popup/popup.ts'],
       outfile: `${dist}/popup/popup.js`,
       ...shared,
     }),

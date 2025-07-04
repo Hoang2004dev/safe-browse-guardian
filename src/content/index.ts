@@ -1,44 +1,71 @@
-//=================================== index.ts
+//=================================== content/index.ts
 import { extractRedirectParam, getHostname } from "./dom";
-import { showWarningPopup } from "./popup";
-import { analyzeUrlInSandbox } from "./sandbox";
+import { showWarningPopup } from "./popup/popup";
+import { analyzeUrlInSandbox } from "./sandbox/index";
 import { setupIframeObserver } from "./observer";
+import { formatThreatMessage } from "./messageFormatter";
+
+let extensionEnabled = true;
+let sandboxEnabled = true;
+
+// Load initial state
+chrome.storage.local.get("localDB", ({ localDB }) => {
+  extensionEnabled = localDB?.extensionEnabled !== false;
+  sandboxEnabled = localDB?.sandboxEnabled ?? true;
+});
+
+// Watch for changes
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName === "local" && changes.localDB) {
+    const db = changes.localDB.newValue;
+    extensionEnabled = db?.extensionEnabled !== false;
+    sandboxEnabled = db?.sandboxEnabled ?? true;
+  }
+});
 
 document.addEventListener("click", async (event) => {
-  const target = (event.target as HTMLElement).closest("a");
-  if (!target || !target.href) return;
+  const anchor = (event.target as HTMLElement).closest("a");
+  if (!anchor || !anchor.href) return;
 
-  event.preventDefault();
-
-  const originalUrl = target.href;
+  const originalUrl = anchor.href;
   const redirectUrl = extractRedirectParam(originalUrl);
   const finalUrl = redirectUrl || originalUrl;
 
-  try {
-    chrome.runtime.sendMessage({ type: "CHECK_URL", url: finalUrl }, async (res) => {
-      const finalUrlResolved = res?.finalUrl || finalUrl;
-      const originalHost = getHostname(originalUrl);
-      const finalHost = getHostname(finalUrlResolved);
+  if (!extensionEnabled) return; // Extension OFF → skip handling
 
-      chrome.storage.local.get("localDB", async ({ localDB }) => {
-        const sandboxEnabled = localDB?.sandboxEnabled ?? true;
+  event.preventDefault();
+
+  try {
+    chrome.runtime.sendMessage(
+      { type: "CHECK_URL", url: finalUrl },
+      async (res) => {
+        const finalUrlResolved = res?.finalUrl || finalUrl;
+        const originalHost = getHostname(originalUrl);
+        const finalHost = getHostname(finalUrlResolved);
+        const issues = res?.issues || [];
+        const detail = res?.detail || {};
+
         let isSafe = res?.safe ?? true;
         let sandbox = null;
 
         if (sandboxEnabled && !isSafe) {
           sandbox = await analyzeUrlInSandbox(finalUrlResolved);
-          isSafe = isSafe && !sandbox.attemptedRedirect && !sandbox.nestedDangerousIframe && !sandbox.externalScript;
+          isSafe =
+            isSafe &&
+            !sandbox.attemptedRedirect &&
+            !sandbox.nestedDangerousIframe &&
+            !sandbox.externalScript;
         }
 
         if (isSafe && originalHost === finalHost) {
           window.location.href = finalUrlResolved;
         } else {
-          let msg = isSafe
-            ? "🔁 Link này sẽ chuyển hướng đến:"
-            : "⚠️ Cảnh báo: Link này có thể nguy hiểm!";
-          if (sandboxEnabled && sandbox?.details?.length > 0) {
-            msg += "<br>Phát hiện hành vi đáng ngờ: " + sandbox.details.join(", ");
-          }
+          const msg = formatThreatMessage(isSafe, { issues, detail, sandbox });
+          const level = !isSafe
+            ? issues.length >= 2
+              ? "critical"
+              : "warning"
+            : "info";
 
           showWarningPopup(
             msg,
@@ -48,18 +75,23 @@ document.addEventListener("click", async (event) => {
               chrome.runtime.sendMessage(
                 { type: "ADD_TO_BLACKLIST", url: finalUrlResolved },
                 (res) => {
-                  if (res?.success) console.log(`✅ Added to blacklist`);
+                  if (res?.success) console.log("✅ Added to blacklist");
                 }
-              )
+              ),
+            level
           );
         }
-      });
-    });
+      }
+    );
   } catch (err) {
     console.error("❌ Lỗi:", err);
-    showWarningPopup("⚠️ Không thể kiểm tra URL. Tiếp tục?", finalUrl,
+    showWarningPopup(
+      "⚠️ Không thể kiểm tra URL. Tiếp tục?",
+      finalUrl,
       () => (window.location.href = finalUrl),
-      () => chrome.runtime.sendMessage({ type: "ADD_TO_BLACKLIST", url: finalUrl })
+      () =>
+        chrome.runtime.sendMessage({ type: "ADD_TO_BLACKLIST", url: finalUrl }),
+      "warning"
     );
   }
 });
