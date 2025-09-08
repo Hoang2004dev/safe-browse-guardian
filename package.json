@@ -5,11 +5,12 @@
   "main": "index.js",
   "scripts": {
     "build": "node esbuild.config.mjs",
-    "dev": "node esbuild.config.mjs --watch"
+    "dev": "nodemon"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.326",
     "esbuild": "^0.25.5",
+    "nodemon": "^3.1.10",
     "typescript": "^5.8.3"
   },
   "keywords": [],

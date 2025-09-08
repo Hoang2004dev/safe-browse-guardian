@@ -9,7 +9,7 @@ const shared = {
   minify: false,
   sourcemap: true,
   target: ['chrome114'],
-  format: 'iife',
+  format: 'esm',
 };
 
 // 🛠 Tạo thư mục nếu chưa tồn tại
