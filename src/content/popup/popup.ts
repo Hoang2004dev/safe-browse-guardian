@@ -52,10 +52,12 @@ export function showWarningPopup(
     btn.id = id;
     btn.textContent = text;
     btn.style.cssText = getButtonStyle(color);
-    btn.onclick = () => {
+    
+    btn.addEventListener("click", () => {
       overlay.remove();
       cb();
-    };
+    });
+
     popup.appendChild(btn);
   }
 

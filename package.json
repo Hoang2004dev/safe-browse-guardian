@@ -9,10 +9,14 @@
   },
   "devDependencies": {
     "@types/chrome": "^0.0.326",
+    "@types/node": "^24.4.0",
     "esbuild": "^0.25.5",
     "typescript": "^5.8.3"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.2.2"
+  }
 }

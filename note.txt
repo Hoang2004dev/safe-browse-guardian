@@ -1,8 +1,6 @@
 npm install --save-dev @types/chrome
 
 
-
-
 SafeBrowseGuardian/
 │
 ├── manifest.json
@@ -17,16 +15,33 @@ SafeBrowseGuardian/
 │       └── checkUrlHandler.ts         ← Gọi aggregator và xử lý warningLogs
 │
 ├── content/
-│   ├── index.ts
-│   ├── dom.ts
-│   ├── popup.ts
+│   ├── core/                   ← những thứ “cốt lõi” của content script
+│   │    └── stateManager.ts      ← quản lý bật/tắt extension, sandbox
+│   │    └── networkInterceptor.ts← hook fetch, XMLHttpRequest
+│   │    └── urlHandler.ts        ← click link, gửi CHECK_URL
+│   │    └── index.ts             ← export tất cả core modules
+│   ├── popup/   
+│   │    └── popup.ts  
+│   │    └── popupStyle.ts
 │   ├── observer.ts
-│   ├── sandbox.ts
-│   └── sandboxAnalyzer.ts             ← Di chuyển logic phân tích sandbox riêng
-│
-├── popup/                             
+│   ├── sandbox/         
+│   │    └── analyzer.ts     
+│   │    └── index.ts
+│   │    └── type.ts
+│   ├── dom.ts
 │   ├── index.ts
-│   ├── normalize.ts
+│   ├── messageFormatter.ts
+│   └── observer.ts             ← Di chuyển logic phân tích sandbox riêng
+│
+├── popup/     
+│   ├── components
+│   │   └── Layout.ts
+│   ├── pages
+│   │   └── home.ts  
+│   │   └── setting.ts                        
+│   │   └── warnings.ts                        
+│   ├── router.ts
+│   ├── popup.ts
 │   ├── rules.ts
 │   ├── storage.ts
 │   ├── ui.ts
@@ -34,8 +49,13 @@ SafeBrowseGuardian/
 │   └── style.css
 │
 ├── shared/
+│   ├── constants
+│   │   └── apikey.ts
+│   │   └── endpoints.ts
 │   ├── utils/
 │   │   └── urlUtils.ts
+│   │   └── safeSendMessage.ts
+│   │   └── normalize.ts
 │   ├── types/
 │   │   └── threatTypes.ts
 │   └── threatSources/

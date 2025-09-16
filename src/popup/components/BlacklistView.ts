@@ -17,6 +17,7 @@ export async function renderBlacklistSection(root: HTMLElement) {
   root.appendChild(section);
   await renderList();
 
+  // Bind sự kiện click cho nút "Thêm Blacklist"
   document.getElementById("addBlack")?.addEventListener("click", async () => {
     const input = document.getElementById("blackInput") as HTMLInputElement;
     const domain = await normalizeDomain(input.value.trim());
@@ -38,7 +39,7 @@ async function renderList() {
   const list = document.getElementById("blacklistList")!;
   list.innerHTML = "";
 
-  db.blacklist.forEach((domain: string) => {
+  db.blacklist.forEach((domain: string, index: number) => {
     const li = document.createElement("li");
     li.style.display = "flex";
     li.style.justifyContent = "space-between";
@@ -50,15 +51,18 @@ async function renderList() {
     const btn = document.createElement("button");
     btn.textContent = "✖";
     btn.className = "danger";
-    btn.onclick = async () => {
-      db.blacklist = db.blacklist.filter((d: string) => d !== domain);
-      await setDB(db);
-      await syncDynamicRulesFromLocalDB();
-      await renderList();
-    };
+    btn.id = `removeBlack_${index}`; // Gán id duy nhất cho mỗi nút xóa
 
     li.appendChild(span);
     li.appendChild(btn);
     list.appendChild(li);
+
+    // Bind sự kiện click cho nút xóa
+    btn.addEventListener("click", async () => {
+      db.blacklist = db.blacklist.filter((d: string) => d !== domain);
+      await setDB(db);
+      await syncDynamicRulesFromLocalDB();
+      await renderList();
+    });
   });
 }

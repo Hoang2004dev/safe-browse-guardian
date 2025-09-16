@@ -7,6 +7,7 @@ export interface LocalDBSchema {
   blockedCount?: number;
   threatCount?: number;
   extensionEnabled?: boolean;
+  checkedCount?: number;
 }
 
 export async function getDB(): Promise<LocalDBSchema> {
@@ -19,6 +20,7 @@ export async function getDB(): Promise<LocalDBSchema> {
         blockedCount: 0,
         threatCount: 0,
         extensionEnabled: true,
+        checkedCount: 0,
       };
 
       if (typeof db.extensionEnabled !== "boolean") db.extensionEnabled = true;

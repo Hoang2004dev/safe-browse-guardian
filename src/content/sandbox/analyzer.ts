@@ -1,7 +1,12 @@
 import { getHostname } from "../dom";
 import type { SandboxReport } from "./types";
+import { safeSendMessage } from "../../shared/utils/safeSendMessage";
 
-export function analyzeDomBehavior(iframe: HTMLIFrameElement, url: string, report: SandboxReport) {
+export function analyzeDomBehavior(
+  iframe: HTMLIFrameElement,
+  url: string,
+  report: SandboxReport
+) {
   try {
     const doc = iframe.contentDocument;
     if (!doc) {
@@ -11,18 +16,24 @@ export function analyzeDomBehavior(iframe: HTMLIFrameElement, url: string, repor
 
     const observer = new MutationObserver((mutations) => {
       for (const mutation of mutations) {
-        mutation.addedNodes.forEach((node: any) => {
+        mutation.addedNodes.forEach(async (node: any) => {
           if (node.tagName === "IFRAME") {
             const src = node.src || "";
             if (/\.(xyz|top|ru|win|click)$/i.test(src)) {
               report.nestedDangerousIframe = true;
               report.details.push(`Iframe đáng ngờ: ${src}`);
+
+              // Gửi log an toàn về background
+              await safeSendMessage({ type: "LOG", message: `⚠️ Sandbox phát hiện iframe đáng ngờ: ${src}` });
             }
           } else if (node.tagName === "SCRIPT" && node.src) {
             const isExternal = getHostname(node.src) !== getHostname(url);
             if (isExternal) {
               report.externalScript = true;
               report.details.push(`Script ngoài: ${node.src}`);
+
+              // Gửi log an toàn về background
+              await safeSendMessage({ type: "LOG", message: `⚠️ Sandbox phát hiện external script: ${node.src}` });
             }
           }
         });
@@ -35,5 +46,6 @@ export function analyzeDomBehavior(iframe: HTMLIFrameElement, url: string, repor
     setTimeout(() => observer.disconnect(), 1000);
   } catch (e) {
     report.details.push(`Không thể quan sát DOM: ${(e as Error).message}`);
+    safeSendMessage({ type: "LOG", message: `❌ Sandbox error: ${(e as Error).message}` });
   }
 }

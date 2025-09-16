@@ -28,6 +28,12 @@ export type SandboxReport = {
   details: string[];
 };
 
+export type ExclusiveScan = {
+  threat: boolean | null;
+  reason: string;
+  source: "MyCustomAPI";
+};
+
 export type ThreatReport = {
   url: string;
   safe: boolean;
@@ -37,6 +43,7 @@ export type ThreatReport = {
     phish: PhishTankResult;
     urlscan: URLScanResult;
     abuse: AbuseIPDBResult;
+    trustLinkApi?: ExclusiveScan;
   };
   sandbox?: SandboxReport;
 };

@@ -14,6 +14,7 @@ export const LocalDB = {
           blockedCount: 0,
           threatCount: 0,
           extensionEnabled: true,
+          cache: {},
         },
       });
     }
@@ -34,6 +35,27 @@ export const LocalDB = {
       }
     );
   },
+
+  async set(db: any) {
+    await chrome.storage.local.set({ [LOCAL_DB_KEY]: db });
+  },
+
+  async setCacheResult(domain: string, safe: boolean, timestamp: number) {
+  const db = await this.get();
+  if (!db.cache) {
+    db.cache = {};
+  }
+  db.cache[domain] = { safe, timestamp };
+  await chrome.storage.local.set({ [LOCAL_DB_KEY]: db });
+},
+
+async getCacheResult(domain: string): Promise<{ safe: boolean; timestamp: number } | null> {
+  const db = await this.get();
+  if (!db.cache) {
+    return null;
+  }
+  return db.cache[domain] || null;
+},
 
   async addToList(listName: string, value: string) {
     const domain = normalizeDomain(value);

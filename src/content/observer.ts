@@ -1,27 +1,52 @@
 //=================================== observer.ts
 import { waitForBody, getHostname } from "./dom";
+import { safeSendMessage } from "../shared/utils/safeSendMessage";
 
-export async function setupIframeObserver() {
+interface BlacklistResponse {
+  blacklist: string[];
+}
+
+export async function setupIframeObserver(): Promise<void> {
   await waitForBody();
   let lastCheck = 0;
 
-  const observer = new MutationObserver(() => {
+  const observer = new MutationObserver(async () => {
     const now = Date.now();
     if (now - lastCheck < 100) return;
     lastCheck = now;
 
-    chrome.runtime.sendMessage({ type: "GET_BLACKLIST" }, ({ blacklist }) => {
-      document.querySelectorAll("iframe").forEach((iframe) => {
+    try {
+      // Đảm bảo safeSendMessage trả về đúng kiểu BlacklistResponse
+      const res = await safeSendMessage<BlacklistResponse>({ type: "GET_BLACKLIST" }).catch((err) => {
+        console.error("❌ Failed to get blacklist:", err);
+        return null;
+      });
+
+      if (!res) return;
+
+      const blacklist = res?.blacklist ?? [];
+
+      document.querySelectorAll("iframe").forEach(async (iframe) => {
         const src = iframe.src || "";
         const host = getHostname(src);
-        const blocked = blacklist.some((b: string) => host === b || host.endsWith("." + b));
+        const blocked = blacklist.some((b) => host === b || host.endsWith("." + b));
+        
         if (blocked) {
-          chrome.runtime.sendMessage({ type: "LOG", message: `🚫 Blocked iframe: ${src}` });
+          await safeSendMessage({ type: "LOG", message: `🚫 Blocked iframe: ${src}` }).catch((err) =>
+            console.error("❌ Failed to log blocked iframe:", err)
+          );
           iframe.remove();
         }
       });
-    });
+    } catch (err) {
+      console.error("❌ Error while checking iframes:", err);
+    }
   });
 
-  observer.observe(document.body, { childList: true, subtree: true });
+  try {
+    // Theo dõi sự thay đổi của body DOM
+    observer.observe(document.body, { childList: true, subtree: true });
+  } catch (err) {
+    console.error("❌ Failed to start iframe observer:", err);
+  }
 }

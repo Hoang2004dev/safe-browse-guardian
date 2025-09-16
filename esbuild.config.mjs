@@ -10,6 +10,7 @@ const shared = {
   sourcemap: true,
   target: ['chrome114'],
   format: 'iife',
+  platform: 'node',
 };
 
 // 🛠 Tạo thư mục nếu chưa tồn tại
