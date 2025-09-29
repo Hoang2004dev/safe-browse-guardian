@@ -1,4 +1,11 @@
+
+import { getPaused } from "../../content/core/pausedState";
+
 export async function safeSendMessage<T = any>(message: any, retries = 2): Promise<T | undefined> {
+  if (getPaused()) {
+    console.warn("⏸️ Extension is paused → skip safeSendMessage:", message);
+    return undefined;
+  }
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
       if (

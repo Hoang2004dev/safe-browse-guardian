@@ -7,5 +7,5 @@ export const ENDPOINTS = {
   PHISHTANK_CHECK: "https://checkurl.phishtank.com/checkurl/",
   URLSCAN_SEARCH: "https://urlscan.io/api/v1/search/?q=domain:",
   URLSCAN_RESULT: (uuid: string) => `https://urlscan.io/api/v1/result/${uuid}/`,
-  EXCLUSIVESCAN_CHECK: "https://api.yourdomain.com/check-url",
+  EXCLUSIVESCAN_CHECK: "https://localhost:7106/api/TrustedLinks",
 };

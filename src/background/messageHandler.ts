@@ -3,6 +3,7 @@ import { handleCheckUrl } from "./handlers/checkUrlHandler";
 import { LocalDB } from "./db";
 import { updateDynamicRules } from "./rules";
 import { normalizeDomain } from "./urlUtils";
+import { setPaused } from ".././content/core/pausedState";
 
 export function registerMessageHandlers() {
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -58,6 +59,7 @@ export function registerMessageHandlers() {
           const db = await LocalDB.get();
           const newState = !db.extensionEnabled;
           await LocalDB.setExtensionEnabled(newState);
+          await setPaused(!newState);
           sendResponse({ success: true, extensionEnabled: newState });
 
           chrome.tabs.query({}, (tabs) => {

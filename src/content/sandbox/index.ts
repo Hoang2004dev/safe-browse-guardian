@@ -23,14 +23,36 @@ export async function analyzeUrlInSandbox(url: string): Promise<SandboxReport> {
     iframe.onload = () => {
       try {
         const href = iframe.contentWindow?.location.href || "";
-        if (href !== url && /^https?:\/\//.test(href)) {
+        const getDomain = (u: string) => {
+          try {
+            return new URL(u).hostname;
+          } catch {
+            return "";
+          }
+        };
+        if (
+          href !== url &&
+          /^https?:\/\//.test(href) &&
+          getDomain(href) !== getDomain(url)
+        ) {
           report.attemptedRedirect = true;
           report.details.push(`Tự động chuyển hướng tới: ${href}`);
         }
       } catch (e) {
-        report.details.push(
-          `Không thể truy cập URL (redirect): ${(e as Error).message}`
-        );
+        // Chỉ ghi lỗi nếu khác domain
+        const getDomain = (u: string) => {
+          try {
+            return new URL(u).hostname;
+          } catch {
+            return "";
+          }
+        };
+        if (getDomain(url) !== window.location.hostname) {
+          report.details.push(
+            `Không thể truy cập nội dung iframe: ${(e as Error).message}`
+          );
+        }
+        // Nếu cùng domain, KHÔNG ghi lỗi vào report
       }
     };
 

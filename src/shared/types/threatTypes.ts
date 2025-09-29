@@ -1,4 +1,5 @@
 //======================= threatTypes.ts
+import { ThreatStatusType  } from "../utils/threatStatus";
 
 export type GoogleSBResult = {
   safe: boolean;
@@ -29,10 +30,11 @@ export type SandboxReport = {
 };
 
 export type ExclusiveScan = {
-  threat: boolean | null;
+  threat: string | null;
   reason: string;
-  source: "MyCustomAPI";
+  source: string;
 };
+
 
 export type ThreatReport = {
   url: string;

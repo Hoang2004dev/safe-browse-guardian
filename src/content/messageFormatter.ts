@@ -19,15 +19,23 @@ export function formatThreatMessage(
     sandbox?: SandboxReport | null;
   }
 ): string {
-  if (isSafe) return "🔁 Link này sẽ chuyển hướng đến:";
+  if (isSafe) {
+    console.log("URL is safe, returning safe message.");
+    return "🔁 Link này sẽ chuyển hướng đến:";
+  }
+  console.log("Checking safety status:", isSafe);
 
   const lines: string[] = [];
 
+  //console.log("Issues being checked: ", issues);
+
   // Cảnh báo chính
-  if (issues.length > 0) {
-    lines.push(`⚠️ Link có dấu hiệu nguy hiểm từ: ${issues.join(", ")}`);
+  const dangerIssues = issues.filter(i => i && !/an toàn|safe|ok/i.test(i));
+  console.log("Filtered Danger Issues: ", dangerIssues);
+  if (dangerIssues.length > 0) {
+    lines.push(`⚠️ Link có dấu hiệu nguy hiểm từ: ${dangerIssues.join(", ")}`);
   } else {
-    lines.push("⚠️ Link có thể không an toàn.");
+    lines.push("🔒 Link này được xác nhận là an toàn.");
   }
 
   // Phân tích chi tiết từ nguồn

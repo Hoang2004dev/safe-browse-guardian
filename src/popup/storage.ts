@@ -8,6 +8,8 @@ export interface LocalDBSchema {
   threatCount?: number;
   extensionEnabled?: boolean;
   checkedCount?: number;
+  paused: boolean;
+  save?: () => Promise<void>;
 }
 
 export async function getDB(): Promise<LocalDBSchema> {
@@ -24,6 +26,10 @@ export async function getDB(): Promise<LocalDBSchema> {
       };
 
       if (typeof db.extensionEnabled !== "boolean") db.extensionEnabled = true;
+      if (typeof db.paused !== "boolean") db.paused = false;
+      db.save = async () => {
+        await chrome.storage.local.set({ localDB: db });
+      };
 
       resolve(db);
     });

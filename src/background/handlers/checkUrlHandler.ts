@@ -1,4 +1,3 @@
-//=================background/handles/checkUrlHandler.ts
 import { getThreatReport } from "../../shared/threatSources/aggregator";
 import { resolveFinalUrl } from "../urlUtils";
 import { LocalDB } from "../db";
@@ -7,12 +6,23 @@ let urlCheckCache: { [key: string]: boolean } = {};
 let processingQueue: Set<string> = new Set();
 
 function getBaseDomain(url: string): string {
-  const parsedUrl = new URL(url);
-  return parsedUrl.hostname;
+  let cleanUrl = url.replace(/^https?:\/\//, '');
+
+  cleanUrl = cleanUrl.replace(/^www\./, '');
+
+  const baseDomain = cleanUrl.split('/')[0];
+  
+  return baseDomain;
 }
 
-export async function handleCheckUrl(originalUrl: string) {
-  
+export type CheckUrlResult = {
+  safe: boolean;
+  finalUrl: string;
+  issues: string[];
+  detail: any;
+};
+
+export async function handleCheckUrl(originalUrl: string): Promise<CheckUrlResult> {
   const db = await LocalDB.get();
   const finalUrl = await resolveFinalUrl(originalUrl);
   const baseDomain = getBaseDomain(finalUrl);
@@ -22,7 +32,7 @@ export async function handleCheckUrl(originalUrl: string) {
       safe: true,
       finalUrl: originalUrl,
       issues: [],
-      detail: { disabled: true }
+      detail: { disabled: true },
     };
   }
 
@@ -37,7 +47,7 @@ export async function handleCheckUrl(originalUrl: string) {
   }
 
   if (processingQueue.has(baseDomain)) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       const interval = setInterval(() => {
         if (!processingQueue.has(baseDomain)) {
           clearInterval(interval);
@@ -46,14 +56,13 @@ export async function handleCheckUrl(originalUrl: string) {
       }, 50);
     });
   }
-  
+
   processingQueue.add(baseDomain);
 
   try {
     const cachedResult = await LocalDB.getCacheResult(baseDomain);
     if (cachedResult !== null) {
       urlCheckCache[baseDomain] = cachedResult.safe;
-      processingQueue.delete(baseDomain);
       return {
         safe: cachedResult.safe,
         finalUrl,
@@ -63,8 +72,10 @@ export async function handleCheckUrl(originalUrl: string) {
     }
 
     const report = await getThreatReport(baseDomain);
+    console.log("Threat report for", baseDomain, report);
 
     urlCheckCache[baseDomain] = report.safe;
+
     await LocalDB.setCacheResult(baseDomain, report.safe, Date.now());
 
     if (!report.safe) {
@@ -73,13 +84,12 @@ export async function handleCheckUrl(originalUrl: string) {
     }
 
     return {
-        safe: report.safe,
-        finalUrl,
-        issues: report.issues,
-        detail: report.detail,
-      };
-  } 
-  finally {
+      safe: report.safe,
+      finalUrl,
+      issues: report.issues,
+      detail: report.detail,
+    };
+  } finally {
     processingQueue.delete(baseDomain);
   }
 }

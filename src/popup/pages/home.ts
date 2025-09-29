@@ -1,5 +1,6 @@
 // popup/pages/home.ts
 import { getDB } from "../storage";
+import { setPaused } from "../../content/core/pausedState";
 
 export class HomePage {
   private root: HTMLElement;
@@ -142,9 +143,10 @@ export class HomePage {
   }
 
   private handleTogglePause() {
-    chrome.runtime.sendMessage({ type: "TOGGLE_PAUSE" }, (res) => {
+    chrome.runtime.sendMessage({ type: "TOGGLE_PAUSE" }, async (res) => {
       console.log("[popup] Toggled:", res);
       this.isEnabled = res.extensionEnabled;
+      await setPaused(!this.isEnabled);
       this.updatePauseUI();
     });
   }
