@@ -4,6 +4,7 @@
   import { setupIframeObserver } from "../observer";
   import { analyzeUrlInSandbox } from "../sandbox/index";
   import type { SandboxReport } from "../sandbox/types";
+  import { initMessageListener } from "./messageListener";
 
   export class ContentScriptManager {
     private stateManager!: StateManager;
@@ -44,6 +45,9 @@
 
       // 5. Load trạng thái ban đầu
       await this.stateManager.init();
+
+      // 6. Lắng nghe message từ background
+      initMessageListener();
     }
 
     /**

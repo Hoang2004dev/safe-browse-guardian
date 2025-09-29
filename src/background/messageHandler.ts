@@ -19,16 +19,30 @@ export function registerMessageHandlers() {
         }
       switch (message.type) {
         case "CHECK_URL":
-          const result = await handleCheckUrl(message.url);
+          if (sender.tab && sender.tab.id) {
+          const tabId = sender.tab.id;  
+          const result = await handleCheckUrl(message.url, tabId);
           const dbb = await LocalDB.get();
           const newCount = (dbb.checkedCount ?? 0) + 1;
           dbb.checkedCount = newCount;
           await LocalDB.set(dbb);
           sendResponse(result);
+          } else {
+              sendResponse({ error: "Tab ID not available." });
+            }
           break;
 
         case "ADD_TO_BLACKLIST":
           await LocalDB.addToList("blacklist", message.url);
+          chrome.tabs.query({}, (tabs) => {
+              for (const tab of tabs) {
+                if (tab.url && tab.url.includes(message.url)) {
+                  chrome.tabs.remove(tab.id!, () => {
+                    console.log(`Tab with URL ${tab.url} has been closed.`);
+                  });
+                }
+              }
+            });
           sendResponse({ success: true });
           break;
 

@@ -47,6 +47,8 @@ export class UrlHandler {
 
       if (!/^https?:\/\//.test(finalUrl)) return;
 
+      //event.preventDefault();  // Ngừng điều hướng
+
       // Phân tích nhanh trong content script (DOM + heuristic)
       const contentReport = await analyzeUrlWithContentScript(finalUrl);
       console.log("Content report:", contentReport);
@@ -56,6 +58,7 @@ export class UrlHandler {
         try {
           const bgResult = await this.checkUrlBackground(finalUrl);
           if (bgResult.safe) {
+            //history.pushState(null, '', finalUrl);
             console.log(`✅ URL là an toàn: ${finalUrl}`);
             return; // Không làm gì cả nếu URL an toàn
           }

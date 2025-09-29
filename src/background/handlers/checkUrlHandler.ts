@@ -1,6 +1,7 @@
 import { getThreatReport } from "../../shared/threatSources/aggregator";
 import { resolveFinalUrl } from "../urlUtils";
 import { LocalDB } from "../db";
+import { showWarningPopup } from "../../content/popup/popup";
 
 let urlCheckCache: { [key: string]: boolean } = {};
 let processingQueue: Set<string> = new Set();
@@ -22,7 +23,7 @@ export type CheckUrlResult = {
   detail: any;
 };
 
-export async function handleCheckUrl(originalUrl: string): Promise<CheckUrlResult> {
+export async function handleCheckUrl(originalUrl: string, tabId: number): Promise<CheckUrlResult> {
   const db = await LocalDB.get();
   const finalUrl = await resolveFinalUrl(originalUrl);
   const baseDomain = getBaseDomain(finalUrl);
@@ -51,7 +52,7 @@ export async function handleCheckUrl(originalUrl: string): Promise<CheckUrlResul
       const interval = setInterval(() => {
         if (!processingQueue.has(baseDomain)) {
           clearInterval(interval);
-          resolve(handleCheckUrl(originalUrl));
+          resolve(handleCheckUrl(originalUrl, tabId));
         }
       }, 50);
     });
@@ -73,6 +74,15 @@ export async function handleCheckUrl(originalUrl: string): Promise<CheckUrlResul
 
     const report = await getThreatReport(baseDomain);
     console.log("Threat report for", baseDomain, report);
+
+    if (report.safe === false) {
+      chrome.tabs.sendMessage(tabId, {
+        type: "SHOW_WARNING",
+        message: `Domain '${baseDomain}' looks similar to a trusted domain. Potential phishing attempt.`,
+        url: finalUrl,
+        level: "critical",
+      });
+    }
 
     urlCheckCache[baseDomain] = report.safe;
 

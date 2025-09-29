@@ -1,8 +1,10 @@
 //=================================== urlUtils.ts
 export function normalizeDomain(domain: string): string {
   try {
-    const hostname = new URL(domain.startsWith("http") ? domain : `https://${domain}`).hostname;
-    return hostname.replace(/^www\./, "").toLowerCase();
+    let cleanUrl = domain.replace(/^https?:\/\//, '');
+    cleanUrl = cleanUrl.replace(/^www\./, '');
+    const baseDomain = cleanUrl.split('/')[0];
+    return baseDomain.toLowerCase();
   } catch {
     return domain.toLowerCase();
   }

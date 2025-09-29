@@ -3,6 +3,7 @@ import { normalizeDomain } from "./urlUtils";
 import { updateDynamicRules } from "./rules";
 import { registerMessageHandlers } from "./messageHandler";
 import { handleCheckUrl } from "./handlers/checkUrlHandler";
+import { showWarningPopup } from "../content/popup/popup";
 
 // Helper function to extract base domain from a URL
 function getBaseDomain(url: string): string {
@@ -105,7 +106,7 @@ chrome.webNavigation.onCompleted.addListener(
 
       try {
         console.log(`🔍 Tab ID ${details.tabId}: Calling handleCheckUrl for ${details.url}`);
-        const checkResult = await handleCheckUrl(details.url);
+        const checkResult = await handleCheckUrl(details.url, details.tabId);
         console.log(`Checked URL: ${details.url}, safe: ${checkResult.safe}`);
 
         if (checkResult.safe) {

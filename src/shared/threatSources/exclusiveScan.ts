@@ -4,13 +4,14 @@ import { damerauLevenshtein } from '../utils/stringUtils';  // hàm bình thư�
 import { ThreatStatus } from "../utils/threatStatus";
 
 // Hàm chuẩn hóa domain từ URL
-function normalizeDomain(input: string): string {
-  try {
-    const hostname = new URL(input).hostname;
-    return hostname.replace(/^www\./, "").toLowerCase();
-  } catch {
-    return input.trim().replace(/^www\./, "").toLowerCase();
-  }
+function getBaseDomain(url: string): string {
+  let cleanUrl = url.replace(/^https?:\/\//, '');
+
+  cleanUrl = cleanUrl.replace(/^www\./, '');
+
+  const baseDomain = cleanUrl.split('/')[0];
+  
+  return baseDomain;
 }
 
 // Hàm kiểm tra ExclusiveScan
@@ -27,7 +28,7 @@ export async function checkExclusiveScan(url: string): Promise<ExclusiveScan> {
     const data = await response.json();
     console.log("Received response:", data);
 
-    const inputDomain = normalizeDomain(url);
+    const inputDomain = getBaseDomain(url);
 
     // Nếu API trả về danh sách (array)
     if (Array.isArray(data)) {
@@ -41,7 +42,7 @@ export async function checkExclusiveScan(url: string): Promise<ExclusiveScan> {
         const raw = entry.url ?? entry.domain;
         if (!raw) return false;
 
-        const trustedDomain = normalizeDomain(raw);
+        const trustedDomain = getBaseDomain(raw);
         const { distance, similarity } = damerauLevenshtein(inputDomain, trustedDomain);
 
         console.log(`Comparing: ${inputDomain} vs ${trustedDomain}`);
