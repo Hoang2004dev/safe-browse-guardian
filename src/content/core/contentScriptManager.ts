@@ -56,31 +56,21 @@
     private pause() {
       this.networkInterceptor.disable();
       this.urlHandler.disable();
-      // TODO: clearInterval, removeEventListener nếu bạn có logic riêng
     }
 
-    /**
-     * Resume logic khi extension bật lại
-     */
+    //  Resume logic khi extension bật lại
     private resume() {
       this.networkInterceptor.enable();
       this.urlHandler.enable();
     }
   }
 
-  /**
-   * Phân tích URL để phát hiện mối đe dọa
-   * Ưu tiên sử dụng content script, nếu thất bại thì dùng sandbox
-   */
+  // Phân tích URL để phát hiện mối đe dọa
   export async function analyzeUrl(url: string): Promise<SandboxReport> {
-    // Ưu tiên dùng content script
     try {
       const report = await analyzeUrlWithContentScript(url);
-      // Nếu có dữ liệu, trả về luôn
       if (report.details.length > 0) return report;
     } catch {
-      // Nếu lỗi, fallback sang sandbox
     }
-    // Dự phòng: dùng sandbox iframe
     return await analyzeUrlInSandbox(url);
   }

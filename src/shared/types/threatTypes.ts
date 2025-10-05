@@ -35,6 +35,11 @@ export type ExclusiveScan = {
   source: string;
 };
 
+export type SuspiciousScan = {
+  threat: string | null;
+  reason: string;
+  source: string;
+};
 
 export type ThreatReport = {
   url: string;
@@ -46,6 +51,7 @@ export type ThreatReport = {
     urlscan: URLScanResult;
     abuse: AbuseIPDBResult;
     trustLinkApi?: ExclusiveScan;
+    suspiciousApi?: SuspiciousScan;
   };
   sandbox?: SandboxReport;
 };

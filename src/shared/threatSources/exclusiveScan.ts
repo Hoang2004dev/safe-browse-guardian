@@ -84,7 +84,7 @@ export async function checkExclusiveScan(url: string): Promise<ExclusiveScan> {
         if (similarity >= 0.8) {  // Độ tương đồng >= 90% là có thể là lừa đảo
           return {
             threat: ThreatStatus.SPOOFING, // Giả mạo (gần giống)
-            reason: `Domain '${inputDomain}' looks similar to trusted domain '${closestMatch}'. Potential phishing attempt.`,
+            reason: `Tên miền '${inputDomain}' bạn đang truy cập bị tình nghi là giả mạo trang web '${closestMatch}'. Đây là một hành vi lừa đảo.`,
             source: "MyCustomAPI-FuzzyMatch",
           };
         }

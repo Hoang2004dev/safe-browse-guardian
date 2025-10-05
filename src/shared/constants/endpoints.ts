@@ -8,4 +8,6 @@ export const ENDPOINTS = {
   URLSCAN_SEARCH: "https://urlscan.io/api/v1/search/?q=domain:",
   URLSCAN_RESULT: (uuid: string) => `https://urlscan.io/api/v1/result/${uuid}/`,
   EXCLUSIVESCAN_CHECK: "https://localhost:7106/api/TrustedLinks",
+  SUSPICIOUS_CHECK: "https://localhost:7106/api/SuspiciousLinks/phishing",
+  PARAGRAPH_CHECK: "https://localhost:7106/api/AI/ask",
 };

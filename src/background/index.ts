@@ -4,6 +4,7 @@ import { updateDynamicRules } from "./rules";
 import { registerMessageHandlers } from "./messageHandler";
 import { handleCheckUrl } from "./handlers/checkUrlHandler";
 import { showWarningPopup } from "../content/popup/popup";
+import { showScanResultPopup } from "../content/popup/popupScan";
 
 // Helper function to extract base domain from a URL
 function getBaseDomain(url: string): string {

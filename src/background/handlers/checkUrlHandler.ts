@@ -78,7 +78,7 @@ export async function handleCheckUrl(originalUrl: string, tabId: number): Promis
     if (report.safe === false) {
       chrome.tabs.sendMessage(tabId, {
         type: "SHOW_WARNING",
-        message: `Domain '${baseDomain}' looks similar to a trusted domain. Potential phishing attempt.`,
+        message: `${report.issues}`,
         url: finalUrl,
         level: "critical",
       });

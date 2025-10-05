@@ -5,14 +5,51 @@ import { checkURLScan } from "./urlScan";
 import { checkAbuseIPDB } from "./abuseIPDB";
 import { isSuspicious } from "./suspiciousHeuristics";
 import { checkExclusiveScan } from "./exclusiveScan";
+import { checkSuspiciousScan } from "./suspiciousScan";
 import { ThreatStatus } from "../utils/threatStatus";
 
 import type { ThreatReport } from "../types/threatTypes";
 
 export async function getThreatReport(url: string): Promise<ThreatReport> {
+
+  const suspiciousApi = await checkSuspiciousScan(url);
+  const issues: string[] = [];
+  console.log(suspiciousApi)
+  console.log("Issues array before processing:", issues);
+  switch (suspiciousApi.threat) {
+    case ThreatStatus.SAFE:
+      issues.push(`Suspicious Link: ${suspiciousApi.reason}`);
+      break;
+
+    case ThreatStatus.SPOOFING:
+      issues.push(`Suspicious Link: ${suspiciousApi.reason}`);
+      return {
+        url,
+        safe: false,
+        issues,
+        detail: {
+          google: { safe: true },
+          phish: { phishing: false, source: "PhishTank" },
+          urlscan: { suspicious: false, source: "URLScan.io" },
+          abuse: { abuseScore: 0, totalReports: 0, source: "AbuseIPDB" },
+          suspiciousApi,
+        },
+      };
+
+    case ThreatStatus.NOT_FOUND:
+      //issues.push("Domain not found in suspicious links.");
+      break;
+
+    case ThreatStatus.ERROR:
+      issues.push("Suspicious link check unavailable.");
+      break;
+
+    default:
+      issues.push("Unknown suspicious link status.");
+  }
+
   console.log("Inside getThreatReport for URL:", url); 
   const trustLinkApi = await checkExclusiveScan(url);
-  const issues: string[] = [];
   console.log(trustLinkApi)
   console.log("Issues array before processing:", issues);
   switch (trustLinkApi.threat) {
@@ -57,7 +94,6 @@ export async function getThreatReport(url: string): Promise<ThreatReport> {
     default:
       issues.push("Unknown trust link status.");
   }
-
 
   const [google, phish, urlscan, abuse,] = await Promise.all([
     checkGoogleSafeBrowsing(url),

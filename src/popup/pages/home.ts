@@ -15,7 +15,7 @@ export class HomePage {
   async init(forceState?: boolean) {
     const db = await getDB();
     this.isEnabled =
-    forceState !== undefined ? forceState : (db.extensionEnabled ?? false);
+      forceState !== undefined ? forceState : (db.extensionEnabled ?? false);
     this.blocked = db.blacklist?.length || 0;
     this.render();
     this.bindEvents();
@@ -44,6 +44,10 @@ export class HomePage {
 
         <button id="pauseBtn" title="${pauseBtnTitle}" class="icon-btn">
           <img id="pauseIcon" src="../assets/${pauseBtnIcon}" width="22" height="22">
+        </button>
+
+        <button id="scanBtn" title="Scan" class="icon-btn">
+          <img src="../assets/scan.png" alt="scan" width="22" height="22">
         </button>
 
         <button id="settingsBtn" title="Settings" class="icon-btn">
@@ -126,6 +130,9 @@ export class HomePage {
       .getElementById("settingsBtn")
       ?.addEventListener("click", () => this.handleSettings());
     document
+      .getElementById("scanBtn")
+      ?.addEventListener("click", () => this.handleScan());
+    document
       .getElementById("enableToggle")
       ?.addEventListener("change", () => this.handleTogglePause());
   }
@@ -155,6 +162,37 @@ export class HomePage {
     chrome.tabs.create({ url: "https://www.google.com" });
   }
 
+  private handleScan() {
+    console.log("[popup] Scan triggered");
+
+    const scanBtn = document.getElementById("scanBtn") as HTMLButtonElement;
+    scanBtn.disabled = true;
+
+    const counter = document.getElementById("checkedCount");
+    if (counter) {
+      counter.textContent = "Đang quét dữ liệu...";
+    }
+
+    chrome.runtime.sendMessage({ type: "SCAN_REQUEST" }, (response) => {
+      console.log("[popup] Scan response:", response);
+
+      if (!response || typeof response.success === "undefined") {
+        counter!.textContent = "❌ Không nhận được phản hồi từ background.";
+        scanBtn.disabled = false;
+        return;
+      }
+
+      if (response.success) {
+        counter!.textContent = "✅ Quét thành công!";
+        console.log("Kết quả từ API:", response.result);
+      } else {
+        counter!.textContent = `❌ Lỗi: ${response.error || "Không xác định"}`;
+      }
+
+      scanBtn.disabled = false;
+    });
+  }
+
   // === UI UPDATERS ===
   private updateBlockedCounter() {
     const counter = document.getElementById("blockedCount");
@@ -162,9 +200,9 @@ export class HomePage {
   }
 
   private updateCheckedCounter() {
-  const counter = document.getElementById("checkedCount");
-  if (counter) counter.textContent = `Checked: ${this.checked}`;
-}
+    const counter = document.getElementById("checkedCount");
+    if (counter) counter.textContent = `Checked: ${this.checked}`;
+  }
 
 
   private updatePauseUI() {
